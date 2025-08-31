@@ -9,7 +9,10 @@ router.get("/", async (req, res) => {
     const orders = await Order.find(); // fetch from database
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    // Log the error internally (for example, to console or a logging system)
+    console.error('Error fetching orders:', err);
+    // Return a generic error message to the client
+    res.status(500).json({ message: "An internal server error occurred." });
   }
 });
 
@@ -20,7 +23,10 @@ router.post("/", async (req, res) => {
     const savedOrder = await newOrder.save();
     res.status(201).json(savedOrder);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    // Log the error internally (for example, to console or a logging system)
+    console.error('Error creating order:', err);
+    // Return a generic error message to the client
+    res.status(400).json({ message: "An error occurred while creating the order." });
   }
 });
 
