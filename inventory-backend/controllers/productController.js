@@ -45,7 +45,19 @@ exports.getProductById = async (req, res) => {
 
 // Update product
 exports.updateProduct = async (req, res) => {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // Whitelist allowed fields for update
+    const allowedFields = ["name", "category", "description", "quantity", "status", "location"];
+    const updateData = {};
+    for (const field of allowedFields) {
+        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            if (field === "quantity") {
+                updateData["stockQty"] = Number(req.body[field]);
+            } else {
+                updateData[field] = req.body[field];
+            }
+        }
+    }
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(product);
 };
 
