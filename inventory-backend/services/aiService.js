@@ -16,8 +16,10 @@ export async function generateSalesReport(orders, products) {
     
     return report;
   } catch (error) {
+    // Log detailed error for internal debugging only
     console.error("Report generation failed:", error);
-    return `Report generation failed: ${error.message}`;
+    // Return a generic error message to the caller
+    return "Report generation failed due to an internal error. Please contact support if the issue persists.";
   }
 }
 
@@ -298,7 +300,7 @@ function generateComprehensiveReport(analysis) {
         .slice(0, 2);
       
       if (topInCategory.length > 0) {
-        report += `• Replace "${product}" with: ${topInCategory.map(([p]) => p).join(', ')}\n`;
+        report += `• Replace \"${product}\" with: ${topInCategory.map(([p]) => p).join(', ')}\n`;
         report += `  Reason: Poor performance (only ${data.quantity} units) in ${productCategory} category\n`;
       }
     });
