@@ -69,3 +69,29 @@
 // });
 
 // export default router;
+//   }
+
+//   try {
+//     const prompt = `Generate a report summary for the following products:\n${JSON.stringify(
+//       sanitizedProducts,
+//       null,
+//       2
+//     )}`;
+
+//     const response = await openai.chat.completions.create({
+//         model: "gpt-3.5-turbo",  // ← use this if you don’t have GPT-4 access
+//         messages: [{ role: "user", content: prompt }],
+//         temperature: 0.7,
+//         max_tokens: 500,
+//       });
+      
+
+//     const report = response.choices[0].message.content;
+//     res.json({ report });
+//   } catch (error) {
+//     console.error("❌ AI report generation failed:", error.message);
+//     res.status(500).json({ message: "AI report generation failed" });
+//   }
+// });
+
+// export default router;
