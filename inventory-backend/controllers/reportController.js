@@ -37,10 +37,11 @@ export const generateReportController = async (req, res) => {
     });
   } catch (error) {
     console.error("Report Error:", error);
+    // Always return a generic error message in the response
     res.status(500).json({ 
       success: false,
       message: "Failed to generate report",
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: "Internal server error"
     });
   }
 };
@@ -211,4 +212,4 @@ function generateComprehensiveReport(analysis) {
   report += "Report generated on: " + new Date().toLocaleString() + "\n";
   
   return report;
-}
+}
