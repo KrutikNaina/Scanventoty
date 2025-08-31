@@ -175,3 +175,55 @@ const Login = () => {
 };
 
 export default Login;
+          {/* left side info */}
+          <div className="hidden lg:block">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/15 text-xs text-neutral-300">
+              Secure • Fast • Role-based
+            </div>
+            <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight">
+              Log in to manage <br /> your inventory.
+            </h1>
+            <p className="mt-4 text-neutral-300">
+              One click with Google. Real-time stock. Error-free billing.
+            </p>
+
+            <ul className="mt-6 space-y-3 text-sm text-neutral-300">
+              <li>• SSO with Google Workspace</li>
+              <li>• Role-based access: Admin, Staff, Auditor</li>
+              <li>• Audit logs & session security</li>
+            </ul>
+          </div>
+
+          {/* right side card */}
+          <div className="p-8 bg-neutral-900 border border-white/10 rounded-2xl shadow-lg">
+            <h2 className="text-2xl font-bold text-center mb-6">
+              Sign in with Google
+            </h2>
+
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-lg hover:bg-gray-100 transition"
+            >
+              <FcGoogle size={20} />
+              <span>Continue with Google</span>
+            </button>
+
+            {user && (
+              <div className="mt-4 text-sm text-green-400 text-center">
+                ✅ Welcome, {user.name} ({user.email})
+              </div>
+            )}
+
+            {warning && (
+              <div className="mt-4 text-sm text-yellow-400 text-center">
+                ⚠️ {warning}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+};
+
+export default Login;
