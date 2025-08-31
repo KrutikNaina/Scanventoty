@@ -4,21 +4,33 @@ import QRCode from "qrcode";
 
 /** Generates a THREE.Texture from text (SKU/URL/etc.) */
 export default function useQRTexture(text = "DEMO-QR", size = 512) {
+  // Define min and max allowed size for the canvas
+  const MIN_SIZE = 64;
+  const MAX_SIZE = 2048;
+  let safeSize = Number(size);
+  if (isNaN(safeSize) || !isFinite(safeSize)) {
+    safeSize = 512;
+  } else {
+    safeSize = Math.round(safeSize);
+    if (safeSize < MIN_SIZE) safeSize = MIN_SIZE;
+    if (safeSize > MAX_SIZE) safeSize = MAX_SIZE;
+  }
+
   const [texture, setTexture] = useState(null);
 
   const canvas = useMemo(() => {
     const c = document.createElement("canvas");
-    c.width = size;
-    c.height = size;
+    c.width = safeSize;
+    c.height = safeSize;
     return c;
-  }, [size]);
+  }, [safeSize]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         await QRCode.toCanvas(canvas, text, {
-          width: size,
+          width: safeSize,
           margin: 1,
           color: { dark: "#000000", light: "#ffffff" },
         });
@@ -32,7 +44,7 @@ export default function useQRTexture(text = "DEMO-QR", size = 512) {
       }
     })();
     return () => { cancelled = true; };
-  }, [text, size, canvas]);
+  }, [text, safeSize, canvas]);
 
   return texture;
 }
