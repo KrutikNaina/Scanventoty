@@ -19,9 +19,35 @@
 //     return res.status(400).json({ message: "Products array is required" });
 //   }
 
+//   // Sanitize and validate each product to prevent prompt injection
+//   const sanitizedProducts = products.map((product) => {
+//     // Only allow objects with string/number/bool/null values, no nested objects/arrays or functions
+//     if (typeof product !== 'object' || product === null || Array.isArray(product)) {
+//       return null;
+//     }
+//     const sanitized = {};
+//     for (const key in product) {
+//       if (!Object.prototype.hasOwnProperty.call(product, key)) continue;
+//       const value = product[key];
+//       if (
+//         typeof value === 'string' ||
+//         typeof value === 'number' ||
+//         typeof value === 'boolean' ||
+//         value === null
+//       ) {
+//         // Escape any dangerous characters in strings
+//         sanitized[key] = typeof value === 'string' ? value.replace(/[\n\r\t\f\b\v\0]/g, ' ') : value;
+//       }
+//     }
+//     return sanitized;
+//   }).filter(Boolean);
+//   if (sanitizedProducts.length === 0) {
+//     return res.status(400).json({ message: "Products array contains no valid product objects" });
+//   }
+
 //   try {
 //     const prompt = `Generate a report summary for the following products:\n${JSON.stringify(
-//       products,
+//       sanitizedProducts,
 //       null,
 //       2
 //     )}`;
