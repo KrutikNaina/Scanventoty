@@ -16,12 +16,25 @@ router.get(
   (req, res) => {
     const { token } = req.user;
 
-    // Send token via postMessage to opener
+    // Determine the allowed origin from an environment variable or config
+    const allowedOrigin = process.env.ALLOWED_OAUTH_ORIGIN;
+
+    if (!allowedOrigin) {
+      // Fail securely if not configured
+      return res.status(500).send("OAuth origin not configured");
+    }
+
+    // Safely serialize the token to prevent XSS
+    const safeToken = JSON.stringify(token);
+
+    // Send token via postMessage to opener with restricted origin
     res.send(`
       <html>
         <body>
           <script>
-            window.opener.postMessage({ type: 'oauth-success', token: '${token}' }, '*');
+            if (window.opener && typeof window.opener.postMessage === 'function') {
+              window.opener.postMessage({ type: 'oauth-success', token: ${safeToken} }, '${allowedOrigin}');
+            }
             window.close();
           </script>
         </body>
