@@ -18,7 +18,7 @@ const addStockLog = async (req, res) => {
 
     res.status(201).json(stockLog);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -31,7 +31,7 @@ const getStockLogs = async (req, res) => {
       .populate("orderId");
     res.json(logs);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -47,20 +47,26 @@ const getStockLogById = async (req, res) => {
 
     res.json(log);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
 // Delete a stock log
 const deleteStockLog = async (req, res) => {
   try {
+    // Authorization: Only allow admins or the user who created the log to delete
     const log = await StockLog.findById(req.params.id);
     if (!log) return res.status(404).json({ error: "Stock log not found" });
+
+    // Check if user is admin or the owner of the log
+    if (!req.user || (!req.user.isAdmin && String(log.userId) !== String(req.user._id))) {
+      return res.status(403).json({ error: "Forbidden: You do not have permission to delete this stock log" });
+    }
 
     await log.remove();
     res.json({ message: "Stock log deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
