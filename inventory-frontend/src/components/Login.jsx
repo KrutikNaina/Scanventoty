@@ -2,11 +2,56 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 
-
 const Login = () => {
   const [warning, setWarning] = useState("");
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  // Helper: minimal JWT signature verification for RS256 (Google tokens)
+  async function verifyGoogleJwt(token) {
+    // Only allow Google-issued ID tokens (RS256, signed by Google)
+    // This function fetches Google's public keys and verifies the JWT signature using Web Crypto API
+    // No new dependencies are introduced
+    if (!token || typeof token !== "string") return false;
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    try {
+      // Get Google's public keys
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/certs");
+      if (!res.ok) return false;
+      const { keys } = await res.json();
+      // Parse JWT header
+      const header = JSON.parse(atob(parts[0].replace(/-/g, "+").replace(/_/g, "/")));
+      if (header.alg !== "RS256" || !header.kid) return false;
+      // Find matching key
+      const jwk = keys.find((k) => k.kid === header.kid);
+      if (!jwk) return false;
+      // Import public key
+      const key = await window.crypto.subtle.importKey(
+        "jwk",
+        jwk,
+        { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+        false,
+        ["verify"]
+      );
+      // Prepare data and signature
+      const data = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
+      // base64url decode signature
+      let sig = parts[2].replace(/-/g, "+").replace(/_/g, "/");
+      while (sig.length % 4) sig += "=";
+      const sigBin = Uint8Array.from(atob(sig), c => c.charCodeAt(0));
+      // Verify signature
+      const valid = await window.crypto.subtle.verify(
+        "RSASSA-PKCS1-v1_5",
+        key,
+        sigBin,
+        data
+      );
+      return valid;
+    } catch {
+      return false;
+    }
+  }
 
   useEffect(() => {
     const listener = (event) => {
@@ -17,13 +62,20 @@ const Login = () => {
         const token = event.data.token;
 
         if (token) {
-          localStorage.setItem("token", token);
-
-          // decode token payload
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setUser(payload);
-
-          navigate("/dashboard"); // redirect after login
+          verifyGoogleJwt(token).then((isValid) => {
+            if (!isValid) {
+              setWarning("Invalid or tampered token received. Login aborted.");
+              return;
+            }
+            try {
+              const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+              setUser(payload);
+              localStorage.setItem("token", token);
+              navigate("/dashboard"); // redirect after login
+            } catch {
+              setWarning("Invalid token payload. Login aborted.");
+            }
+          });
         } else {
           setWarning("Token missing in OAuth response.");
         }
