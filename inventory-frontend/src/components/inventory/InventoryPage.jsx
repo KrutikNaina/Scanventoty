@@ -99,7 +99,7 @@ function InventoryTable({ rows, sortBy, onSort, onEdit, onShowQR }) {
                     ) : (
                       <div className="inline-flex items-center gap-2 justify-end">
                         <span className="text-white font-medium">${r.price?.toFixed(2) ?? 0}</span>
-                        <button className="text-neutral-400 hover:text-white" onClick={() => startEdit(id, "price")}>
+                        <button className="text-neutral-400 hover:text-white" onClick={() => startEdit(id, "price")}> 
                           <PencilLine className="h-4 w-4" />
                         </button>
                       </div>
@@ -119,7 +119,7 @@ function InventoryTable({ rows, sortBy, onSort, onEdit, onShowQR }) {
                     ) : (
                       <div className="inline-flex items-center gap-2 justify-end">
                         <span className="text-white font-medium">{r.stock}</span>
-                        <button className="text-neutral-400 hover:text-white" onClick={() => startEdit(id, "stock")}>
+                        <button className="text-neutral-400 hover:text-white" onClick={() => startEdit(id, "stock")}> 
                           <PencilLine className="h-4 w-4" />
                         </button>
                       </div>
@@ -202,9 +202,15 @@ export default function InventoryPage() {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/products", {
-          headers: { Authorization: `Bearer ${token}` },
+        // Use cookies for authentication, do not use localStorage for tokens
+        if (window.location.protocol !== "https:") {
+          console.error("Insecure context: Refusing to fetch inventory over non-HTTPS connection.");
+          return;
+        }
+        // The backend should set an HttpOnly, Secure cookie for authentication
+        // No token is retrieved from localStorage or sent manually
+        const res = await axios.get("/api/products", {
+          withCredentials: true // send cookies
         });
         setRows(res.data);
       } catch (err) {
