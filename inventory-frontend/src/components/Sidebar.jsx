@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -12,12 +12,32 @@ import {
 export default function Sidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState({ role: "Guest" });
 
-  // Get current user from localStorage
-  const currentUser = JSON.parse(localStorage.getItem("user")) || { role: "Guest" };
+  // Securely fetch current user from server after authentication
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setCurrentUser({ role: "Guest" });
+        return;
+      }
+      try {
+        const res = await fetch("/api/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Not authenticated");
+        const user = await res.json();
+        setCurrentUser(user);
+      } catch {
+        setCurrentUser({ role: "Guest" });
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
